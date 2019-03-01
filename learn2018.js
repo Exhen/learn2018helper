@@ -2,18 +2,18 @@
 // @icon         http://www.tsinghua.edu.cn/publish/newthu/images/favicon.ico
 // @name         网络学堂2018助手
 // @namespace    exhen32@live.com
-// @version      2019年3月1日02版
+// @version      2019年3月1日03版
 // @description  微调排版，提醒更醒目; 支持导出日历，课程一目了然；更多功能开发中！
 // @require      http://cdn.bootcss.com/jquery/3.2.1/jquery.min.js
 // @require      https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js
 // @author       Exhen
-// @match        http*://learn2018.tsinghua.edu.cn/f/wlxt/index/course/student/
+// @match        http*://learn.tsinghua.edu.cn/f/wlxt/index/course/student/
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_addStyle
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @connect      learn2018.tsinghua.edu.cn
+// @connect      learn.tsinghua.edu.cn
 // @updateURL    https://github.com/Exhen/learn2018helper/raw/master/learn2018.js
 // @run-at       document-idle
 // ==/UserScript==
@@ -329,11 +329,12 @@ function init() {
                 //var wlkcid = $(this).find('.hdtitle a').attr('href').match(/(?<=wlkcid=).*/);
                 var wlkcid = $(this).find('.hdtitle a').attr('href').slice(43);
                 $(this).attr('id', wlkcid)
-                getJSON(`http://learn2018.tsinghua.edu.cn/b/wlxt/kczy/zy/student/index/zyListWj?wlkcid=${wlkcid}&size=99`, function (doc, url) {
+                getJSON(`http://learn.tsinghua.edu.cn/b/wlxt/kczy/zy/student/index/zyListWj?wlkcid=${wlkcid}&size=99`, function (doc, url) {
                     if (doc) {
                         var ddl = 0;
+                        var now=new Date();
                         for (var i = 0; i < doc.object.iTotalRecords; i++) {
-                            if (ddl <= 0 || ddl > doc.object.aaData[i].jzsj) {
+                            if (ddl <= 0 || (ddl > doc.object.aaData[i].jzsj&&doc.object.aaData[i].jzsj>now.getTime())) {
                                 ddl = doc.object.aaData[i].jzsj
                             }
                         }
@@ -457,7 +458,7 @@ function init() {
                     var wlkcid = $(this).parent().parent().parent().find('.hdtitle a').attr('href').slice(43);
                     var classTitle = $(this).parent().parent().find('a.stu').text().replace(/\(.*-.*\)/, '').trim();
                     var classTeacher = $(this).parent().parent().find('.stu_btn span').text();
-                    getJSON(`http://learn2018.tsinghua.edu.cn/b/wlxt/kczy/zy/student/index/zyListWj?wlkcid=${wlkcid}&size=99`, function (doc, url) {
+                    getJSON(`http://learn.tsinghua.edu.cn/b/wlxt/kczy/zy/student/index/zyListWj?wlkcid=${wlkcid}&size=99`, function (doc, url) {
                         if (doc) {
                             var ddl = 0;
                             for (var i = 0; i < doc.object.iTotalRecords; i++) {
