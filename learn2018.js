@@ -2,12 +2,12 @@
 // @icon         http://www.tsinghua.edu.cn/publish/newthu/images/favicon.ico
 // @name         网络学堂2018助手
 // @namespace    exhen32@live.com
-// @version      2019年3月1日01版
+// @version      2019年3月1日02版
 // @description  微调排版，提醒更醒目; 支持导出日历，课程一目了然；更多功能开发中！
 // @require      http://cdn.bootcss.com/jquery/3.2.1/jquery.min.js
 // @require      https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js
 // @author       Exhen
-// @match        http*://learn2018.tsinghua.edu.cn/*
+// @match        http*://learn2018.tsinghua.edu.cn/f/wlxt/index/course/student/
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_addStyle
@@ -27,26 +27,29 @@ var saveAs = saveAs || (function (view) {
     var
         doc = view.document
         // only get URL when necessary in case Blob.js hasn't overridden it yet
-        , get_URL = function () {
+        ,
+        get_URL = function () {
             return view.URL || view.webkitURL || view;
-        }
-        , save_link = doc.createElementNS("http://www.w3.org/1999/xhtml", "a")
-        , can_use_save_link = "download" in save_link
-        , click = function (node) {
+        },
+        save_link = doc.createElementNS("http://www.w3.org/1999/xhtml", "a"),
+        can_use_save_link = "download" in save_link,
+        click = function (node) {
             var event = new MouseEvent("click");
             node.dispatchEvent(event);
-        }
-        , is_safari = /constructor/i.test(view.HTMLElement) || view.safari
-        , is_chrome_ios = /CriOS\/[\d]+/.test(navigator.userAgent)
-        , throw_outside = function (ex) {
+        },
+        is_safari = /constructor/i.test(view.HTMLElement) || view.safari,
+        is_chrome_ios = /CriOS\/[\d]+/.test(navigator.userAgent),
+        throw_outside = function (ex) {
             (view.setImmediate || view.setTimeout)(function () {
                 throw ex;
             }, 0);
-        }
-        , force_saveable_type = "application/octet-stream"
+        },
+        force_saveable_type = "application/octet-stream"
         // the Blob API is fundamentally broken as there is no "downloadfinished" event to subscribe to
-        , arbitrary_revoke_timeout = 1000 * 40 // in ms
-        , revoke = function (file) {
+        ,
+        arbitrary_revoke_timeout = 1000 * 40 // in ms
+        ,
+        revoke = function (file) {
             var revoker = function () {
                 if (typeof file === "string") { // file is an object URL
                     get_URL().revokeObjectURL(file);
@@ -55,8 +58,8 @@ var saveAs = saveAs || (function (view) {
                 }
             };
             setTimeout(revoker, arbitrary_revoke_timeout);
-        }
-        , dispatch = function (filesaver, event_types, event) {
+        },
+        dispatch = function (filesaver, event_types, event) {
             event_types = [].concat(event_types);
             var i = event_types.length;
             while (i--) {
@@ -69,30 +72,32 @@ var saveAs = saveAs || (function (view) {
                     }
                 }
             }
-        }
-        , auto_bom = function (blob) {
+        },
+        auto_bom = function (blob) {
             // prepend BOM for UTF-8 XML and text/* types (including HTML)
             // note: your browser will automatically convert UTF-16 U+FEFF to EF BB BF
             if (/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
-                return new Blob([String.fromCharCode(0xFEFF), blob], { type: blob.type });
+                return new Blob([String.fromCharCode(0xFEFF), blob], {
+                    type: blob.type
+                });
             }
             return blob;
-        }
-        , FileSaver = function (blob, name, no_auto_bom) {
+        },
+        FileSaver = function (blob, name, no_auto_bom) {
             if (!no_auto_bom) {
                 blob = auto_bom(blob);
             }
             // First try a.download, then web filesystem, then object URLs
             var
-                filesaver = this
-                , type = blob.type
-                , force = type === force_saveable_type
-                , object_url
-                , dispatch_all = function () {
+                filesaver = this,
+                type = blob.type,
+                force = type === force_saveable_type,
+                object_url, dispatch_all = function () {
                     dispatch(filesaver, "writestart progress write writeend".split(" "));
                 }
                 // on any filesys errors revert to saving with object URLs
-                , fs_error = function () {
+                ,
+                fs_error = function () {
                     if ((is_chrome_ios || (force && is_safari)) && view.FileReader) {
                         // Safari doesn't allow downloading of blob urls
                         var reader = new FileReader();
@@ -124,8 +129,7 @@ var saveAs = saveAs || (function (view) {
                     filesaver.readyState = filesaver.DONE;
                     dispatch_all();
                     revoke(object_url);
-                }
-                ;
+                };
             filesaver.readyState = filesaver.INIT;
 
             if (can_use_save_link) {
@@ -142,12 +146,11 @@ var saveAs = saveAs || (function (view) {
             }
 
             fs_error();
-        }
-        , FS_proto = FileSaver.prototype
-        , saveAs = function (blob, name, no_auto_bom) {
+        },
+        FS_proto = FileSaver.prototype,
+        saveAs = function (blob, name, no_auto_bom) {
             return new FileSaver(blob, name || blob.name || "download", no_auto_bom);
-        }
-        ;
+        };
     // IE 10+ (native saveAs)
     if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
         return function (blob, name, no_auto_bom) {
@@ -160,7 +163,7 @@ var saveAs = saveAs || (function (view) {
         };
     }
 
-    FS_proto.abort = function () { };
+    FS_proto.abort = function () {};
     FS_proto.readyState = FS_proto.INIT = 0;
     FS_proto.WRITING = 1;
     FS_proto.DONE = 2;
@@ -176,9 +179,9 @@ var saveAs = saveAs || (function (view) {
 
     return saveAs;
 }(
-    typeof self !== "undefined" && self
-    || typeof window !== "undefined" && window
-    || this.content
+    typeof self !== "undefined" && self ||
+    typeof window !== "undefined" && window ||
+    this.content
 ));
 // `self` is undefined in Firefox for Android content script context
 // while `this` is nsIContentFrameMessageManager
@@ -236,7 +239,7 @@ function waitForKeyElements(
         targetNodes = jQuery(selectorTxt);
     else
         targetNodes = jQuery(iframeSelector).contents()
-            .find(selectorTxt);
+        .find(selectorTxt);
 
     if (targetNodes && targetNodes.length > 0) {
         btargetsFound = true;
@@ -274,12 +277,12 @@ function waitForKeyElements(
         //--- Set a timer, if needed.
         if (!timeControl) {
             timeControl = setInterval(function () {
-                waitForKeyElements(selectorTxt,
-                    actionFunction,
-                    bWaitOnce,
-                    iframeSelector
-                );
-            },
+                    waitForKeyElements(selectorTxt,
+                        actionFunction,
+                        bWaitOnce,
+                        iframeSelector
+                    );
+                },
                 300
             );
             controlObj[controlKey] = timeControl;
@@ -288,6 +291,9 @@ function waitForKeyElements(
     waitForKeyElements.controlObj = controlObj;
 }
 
+function PrefixInteger(num, length) {
+    return (Array(length).join(0) + num).slice(-length);
+}
 
 function init() {
     if (!document.getElementById("dUietC") && $('ul.stu').length) {
@@ -360,7 +366,6 @@ function init() {
 
         // 导出日历
         $('dd.stu').each(function () {
-
             var calendarBtn = $('<p class="calendar_btn myToobar"><a href="javascript:void()">导出课程日历</a></p>');
             calendarBtn.click(function () {
                 console.log($(this).attr('class'))
@@ -375,7 +380,9 @@ function init() {
                         var eachClass = classDesc.split(',')[i];
                         console.log(eachClass)
                         var classLocation = eachClass.split('，')[1];
-                        var classTimeBegin = '', classTimeEnd = $(), classWeek = '';
+                        var classTimeBegin = '',
+                            classTimeEnd = $(),
+                            classWeek = '';
                         switch (eachClass.match(/星期(.)/)[1]) {
                             case '日':
                                 classWeek = 'SU';
@@ -400,10 +407,7 @@ function init() {
                                 break;
                         }
                         var now = new Date();
-                        function PrefixInteger(num, length) {
-                            return (Array(length).join(0) + num).slice(-length);
-                        }
-                        var today = PrefixInteger(now.getFullYear(), 4) + PrefixInteger(now.getMonth() + 1, 2) + PrefixInteger(now.getDate(), 2);
+                        var today = PrefixInteger(now.getUTCFullYear(), 4) + PrefixInteger(now.getUTCMonth() + 1, 2) + PrefixInteger(now.getUTCDate(), 2);
                         switch (eachClass.match(/第(.)节/)[1]) {
                             case '1':
                                 var classTimeBegin = today + 'T000000Z';
@@ -430,33 +434,57 @@ function init() {
                                 var classTimeEnd = today + 'T134500Z';
                                 break;
                         }
-
-                        console.log(`ORGANIZER:${classTeacher}\nDTSTART;TZID=Asia/Shanghai:${classTimeBegin}\nDTEND;TZID=Asia/Shanghai:${classTimeEnd}\nRRULE:FREQ=WEEKLY;BYDAY=${classWeek};UNTIL=${classUntil};WKST=MO\nLOCATION:${classLocation}\nSUMMARY:${classTitle}\nDESCRIPTION:${classDesc}\n`)
                         var calendarData = `BEGIN:VCALENDAR\nVERSION:2.0\nMETHOD:PUBLISH\nBEGIN:VEVENT\nORGANIZER:${classTeacher}\nDTSTART;TZID=Asia/Shanghai:${classTimeBegin}\nDTEND;TZID=Asia/Shanghai:${classTimeEnd}\nRRULE:FREQ=WEEKLY;BYDAY=${classWeek};UNTIL=${classUntil};WKST=MO\nLOCATION:${classLocation}\nSUMMARY:${classTitle}（${classTeacher}）\nDESCRIPTION:${classDesc}\nPRIORITY:5\nCLASS:PUBLIC\nBEGIN:VALARM\nTRIGGER:-PT15M\nACTION:DISPLAY\nDESCRIPTION:Reminder\nEND:VALARM\nEND:VEVENT\nEND:VCALENDAR`;
-                        var file = new File([calendarData], (classTitle + '-'+i+'.ics'), { type: "text/plain;charset=utf-8" });
+                        var file = new File([calendarData], (classTitle + '-' + i + '.ics'), {
+                            type: "text/plain;charset=utf-8"
+                        });
                         saveAs(file);
                     }
-                    
-                }
-                else {
+
+                } else {
                     alert('课程时间错误，无法导出。')
                 }
 
             })
             $(this).find('div.state.stu').append(calendarBtn);
 
-        })
 
-        // 作业日历
-        $('dd.stu').each(function () {
 
+            // 作业日历
             var ddlBtn = $('<p class="calendar_btn myToobar"><a href="javascript:void()">导出作业日历</a></p>');
             ddlBtn.click(function () {
-                $('body').prepend('<div onClick="$(this).hide()" id="manualAlert" style="display: none;position: absolute;width: 100%;height: 100%;background: #4646466b;z-index: 999;"><span style="background: #fffffff5;border-radius: 3px;left: 30%;right: 30%;position: fixed;text-align: center;padding: 3%;line-height: 40px;font-size: 30px;">作者偷懒，代码还没敲完！扫码催活<img src="https://exhen.github.io//assets/img/qrcode.png"></span></div>')
-                    $('#manualAlert').fadeIn();
-                    setTimeout(function () {
-                        $('#manualAlert').fadeOut();
-                    }, 10000)
+                if (parseInt($(this).parent().parent().parent().find('span.green').text()) > 0) {
+                    var wlkcid = $(this).parent().parent().parent().find('.hdtitle a').attr('href').slice(43);
+                    var classTitle = $(this).parent().parent().find('a.stu').text().replace(/\(.*-.*\)/, '').trim();
+                    var classTeacher = $(this).parent().parent().find('.stu_btn span').text();
+                    getJSON(`http://learn2018.tsinghua.edu.cn/b/wlxt/kczy/zy/student/index/zyListWj?wlkcid=${wlkcid}&size=99`, function (doc, url) {
+                        if (doc) {
+                            var ddl = 0;
+                            for (var i = 0; i < doc.object.iTotalRecords; i++) {
+                                var current = doc.object.aaData[i];
+                                var tempDate = new Date();
+                                tempDate.setTime(current.jzsj - 3600000);
+                                console.log(current.jzsj)
+                                var tempDateBefore = new Date();
+                                tempDateBefore.setTime(current.jzsj - 86400000 - 3600000);
+                                var currDDL = PrefixInteger(tempDate.getUTCFullYear(), 4) + PrefixInteger(tempDate.getUTCMonth() + 1, 2) + PrefixInteger(tempDate.getUTCDate(), 2) + 'T' + PrefixInteger(tempDate.getUTCHours(), 2) + PrefixInteger(tempDate.getUTCMinutes(), 2) + PrefixInteger(tempDate.getUTCSeconds(), 2) + 'Z';
+                                var currDDLBefore = PrefixInteger(tempDateBefore.getUTCFullYear(), 4) + PrefixInteger(tempDateBefore.getUTCMonth() + 1, 2) + PrefixInteger(tempDateBefore.getUTCDate(), 2) + 'T' + PrefixInteger(tempDateBefore.getUTCHours(), 2) + PrefixInteger(tempDateBefore.getUTCMinutes(), 2) + PrefixInteger(tempDateBefore.getUTCSeconds(), 2) + 'Z';
+                                var currTitle = current.bt;
+
+                                var calendarData = `BEGIN:VCALENDAR\nVERSION:2.0\nMETHOD:PUBLISH\nBEGIN:VEVENT\nORGANIZER:${classTeacher}\nDTSTART;TZID=Asia/Shanghai:${currDDLBefore}\nDTEND;TZID=Asia/Shanghai:${currDDL}\nSUMMARY:${currTitle}（${classTitle}）\nDESCRIPTION:${classTitle}（${classTeacher}），截止时间：${current.jzsjStr}\nPRIORITY:5\nCLASS:PUBLIC\nBEGIN:VALARM\nTRIGGER:-PT1440M\nACTION:DISPLAY\nDESCRIPTION:Reminder\nEND:VALARM\nEND:VEVENT\nEND:VCALENDAR`;
+                                var file = new File([calendarData], (classTitle + '-' + PrefixInteger(i, 2) + '-' + currTitle + '.ics'), {
+                                    type: "text/plain;charset=utf-8"
+                                });
+                                saveAs(file);
+
+
+                            }
+
+                        }
+                    })
+                }else{
+                    alert('暂时没有可以导出的DDL')
+                }
             })
             $(this).find('div.state.stu').append(ddlBtn);
 
@@ -468,10 +496,10 @@ function init() {
             var notificationBtn = $('<p class="calendar_btn myToobar"><a href="javascript:void()">公告一键已读</a></p>');
             notificationBtn.click(function () {
                 $('body').prepend('<div onClick="$(this).hide()" id="manualAlert" style="display: none;position: absolute;width: 100%;height: 100%;background: #4646466b;z-index: 999;"><span style="background: #fffffff5;border-radius: 3px;left: 30%;right: 30%;position: fixed;text-align: center;padding: 3%;line-height: 40px;font-size: 30px;">作者偷懒，代码还没敲完！扫码催活<img src="https://exhen.github.io//assets/img/qrcode.png"></span></div>')
-                    $('#manualAlert').fadeIn();
-                    setTimeout(function () {
-                        $('#manualAlert').fadeOut();
-                    }, 10000)
+                $('#manualAlert').fadeIn();
+                setTimeout(function () {
+                    $('#manualAlert').fadeOut();
+                }, 10000)
             })
             $(this).find('div.state.stu').append(notificationBtn);
 
@@ -483,10 +511,10 @@ function init() {
             var attachmentBtn = $('<p class="calendar_btn myToobar"><a href="javascript:void()">课件批量下载</a></p>');
             attachmentBtn.click(function () {
                 $('body').prepend('<div onClick="$(this).hide()" id="manualAlert" style="display: none;position: absolute;width: 100%;height: 100%;background: #4646466b;z-index: 999;"><span style="background: #fffffff5;border-radius: 3px;left: 30%;right: 30%;position: fixed;text-align: center;padding: 3%;line-height: 40px;font-size: 30px;">作者偷懒，代码还没敲完！扫码催活<img src="https://exhen.github.io//assets/img/qrcode.png"></span></div>')
-                    $('#manualAlert').fadeIn();
-                    setTimeout(function () {
-                        $('#manualAlert').fadeOut();
-                    }, 10000)
+                $('#manualAlert').fadeIn();
+                setTimeout(function () {
+                    $('#manualAlert').fadeOut();
+                }, 10000)
             })
             $(this).find('div.state.stu').append(attachmentBtn);
 
