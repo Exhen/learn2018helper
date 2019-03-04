@@ -2,7 +2,7 @@
 // @icon         http://www.tsinghua.edu.cn/publish/newthu/images/favicon.ico
 // @name         网络学堂2018助手
 // @namespace    exhen32@live.com
-// @version      2019年3月1日04版
+// @version      2019年3月4日01版
 // @description  微调排版，提醒更醒目; 支持导出日历，课程一目了然；课件批量下载，公告一键标记，拯救强迫症。
 // @require      http://cdn.bootcss.com/jquery/3.2.1/jquery.min.js
 // @require      https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js
@@ -16,6 +16,7 @@
 // @connect      learn.tsinghua.edu.cn
 // @updateURL    https://greasyfork.org/scripts/378558-%E7%BD%91%E7%BB%9C%E5%AD%A6%E5%A0%822018%E5%8A%A9%E6%89%8B/code/%E7%BD%91%E7%BB%9C%E5%AD%A6%E5%A0%822018%E5%8A%A9%E6%89%8B.user.js
 // @run-at       document-idle
+// @updateURL    https://greasyfork.org/scripts/378558/code/user.js
 // ==/UserScript==
 
 var blocker = $('<div class="blocker" id="manualAlert" style="position: fixed;width: 100%;height: 100%;background: #4646466b;z-index: 999;"></div>')
@@ -353,7 +354,7 @@ function init() {
                         var days = Math.ceil(time / 86400000);
                         if (time <= 0) {
                             $(`#${wlkcid}`).find('li.clearfix').first().css('background', 'url(https://raw.githubusercontent.com/Exhen/learn2018helper/master/liangle.jpg)');
-                            $(`#${wlkcid}`).find('li.clearfix').first().append(`<span style="color: red;font-size: 16px;padding:  10px 18px;line-height: 18px;width: 18px;text-align: center;display: block;float: right;">已经截至</span>`)
+                            $(`#${wlkcid}`).find('li.clearfix').first().append(`<span style="color: red;font-size: 16px;padding:  10px 18px;line-height: 18px;width: 18px;text-align: center;display: block;float: right;">已经截止</span>`)
                         } else if (time <= 86400000) { //多于7天
                             $(`#${wlkcid}`).find('li.clearfix').first().css('background', 'url(https://raw.githubusercontent.com/Exhen/learn2018helper/master/ddl.jpg)');
                             $(`#${wlkcid}`).find('li.clearfix').first().append(`<span style="color: red;font-size: 16px;padding:  10px 18px;line-height: 18px;width: 18px;text-align: center;display: block;float: right;">最后一天</span>`)
@@ -431,8 +432,8 @@ function init() {
                                 var classTimeEnd = today + 'T085500Z';
                                 break;
                             case '5':
-                                var classTimeBegin = today + 'T093000Z';
-                                var classTimeEnd = today + 'T110500Z';
+                                var classTimeBegin = today + 'T090500Z';
+                                var classTimeEnd = today + 'T104000Z';
                                 break;
                             case '6':
                                 var classTimeBegin = today + 'T112000Z';
